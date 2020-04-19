@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="nl">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<title>Verplaatsbewijs - Aanmaken</title>
+		<link href="/css/verplaatsbewijs-nl/verplaatsbewijs.css" rel="stylesheet">
+		<script src="/js/verplaatsbewijs-nl/verplaatsbewijs.js"></script>
+		<script src="/js/js-sha512/sha512.min.js"></script>
+	</head>
+	<body>
+
+		<h1>Verplaatsbewijs aanmaken</h1>
+		<form onsubmit="aanmaken(); return false;">
+			<div>
+				<label>
+					Uitnodigingscode:
+					<input type="text" id="uitnodiging" value="ABCDEFGHJKMNPQRS" placeholder="Voer de 16 tekens van uw brief in." />
+				</label>
+			</div>
+			<div>
+				<label>
+					Volledige voor- en achternaam zoals geschreven op identiteitsbewijs:
+					<input type="text" id="naam" value="Jan Jansen" />
+				</label>
+			</div>
+			<div>
+				<label>
+					Postcode en huisnummer van huidige verblijfplaats:
+					<input type="text" id="postcode1" value="1000AA" />
+					<input type="text" id="huisnummer1" value="1" />
+				</label>
+			</div>
+			<div>
+				<label>
+					Postcode en huisnummer van eerste bezoekadres:
+					<input type="text" id="postcode2" value="2000AA" />
+					<input type="text" id="huisnummer2" value="22" />
+				</label>
+			</div>
+			<div>
+				<label>
+					Postcode en huisnummer van eerste bezoekadres:
+					<input type="text" id="postcode3" value="3000AA" />
+					<input type="text" id="huisnummer3" value="333" />
+				</label>
+			</div>
+			<div>
+				<label>
+					Postcode en huisnummer van eerste bezoekadres:
+					<input type="text" id="postcode4" value="4000AA" />
+					<input type="text" id="huisnummer4" value="444a" />
+				</label>
+			</div>
+			<div>
+				<label>
+					Postcode en huisnummer van eerste bezoekadres:
+					<input type="text" id="postcode5" value="5000AA" />
+					<input type="text" id="huisnummer5" value="555bis" />
+				</label>
+			</div>
+			<input type="submit" value="Verplaatsbewijs aanmaken" />
+		</form>
+		
+		<script>
+			function aanmaken()
+			{
+				var invoer =
+				{
+					uitnodiging: document.getElementById("uitnodiging").value,
+					naam: document.getElementById("naam").value,
+					adressen: [
+						{postcode: document.getElementById("postcode1").value, huisnummer: document.getElementById("huisnummer1").value},
+						{postcode: document.getElementById("postcode2").value, huisnummer: document.getElementById("huisnummer2").value},
+						{postcode: document.getElementById("postcode3").value, huisnummer: document.getElementById("huisnummer3").value},
+						{postcode: document.getElementById("postcode4").value, huisnummer: document.getElementById("huisnummer4").value},
+						{postcode: document.getElementById("postcode5").value, huisnummer: document.getElementById("huisnummer5").value}
+					]
+				};
+				var uitvoer = {};
+				var status = [];
+				
+				// Controleer invoer en vul data in uitvoer aan
+				if (/[a-zA-Z0-9]{16}/.test(invoer.uitnodiging))
+				{
+					uitvoer.uitnodiging = invoer.uitnodiging.trim().toUpperCase();
+				}
+				else
+				{
+					status.push("Uitnodigingscode onjuist.");
+				}
+				if (invoer.naam.trim().length > 5)
+				{
+					uitvoer.naam = invoer.naam.trim().toUpperCase().replace(/[^a-zA-Z]/g, "");
+				}
+				else
+				{
+					status.push("Volledige voor- en achternaam invullen.");
+				}
+				uitvoer.adressen = invoer.adressen
+					.map(function(adres)
+					{
+						if (adres.postcode.trim().length == 0 && adres.huisnummer.trim().length == 0)
+						{
+							return "";
+						}
+						else if (adres.postcode.trim().length == 0 || adres.huisnummer.trim().length == 0)
+						{
+							status.push("Postcode of huisnummer onjuist.");
+						}
+						try
+						{
+							return adres.postcode.match(/([0-9]{4}).*?([a-zA-Z]{2})/).splice(1).join("").toUpperCase() +
+								adres.huisnummer.match(/([0-9]{1,5})([^0-9a-zA-Z]{0,5})([a-zA-Z]{0,3})/).splice(1).join("").toUpperCase();
+						}
+						catch(e)
+						{
+							status.push("Postcode of huisnummer onjuist.");
+						}
+					})
+					.filter(function(adres)
+					{
+						return adres.length > 0;
+					});
+				if (uitvoer.adressen.length <= 1)
+				{
+					status.push("Vul minimaal twee adressen in.");
+				}
+				
+				// Controleer of er foutmeldingen waren. Zo niet, maak het verplaatsbewijs aan.
+				if (status.length > 0)
+				{
+					alert("Niet alle gegevens zijn juist ingevoerd:\n\n" + status.join("\n"));
+				}
+				else
+				{
+					verplaatsbewijs.aanmaken(
+						uitvoer,
+						function succes(link)
+						{
+							location.href = link;
+						},
+						function fout(foutmelding)
+						{
+							alert(foutmelding);
+						});
+				}
+			}
+		</script>
+		
+	</body>
+</html>

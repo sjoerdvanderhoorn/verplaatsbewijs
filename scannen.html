@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="nl">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<title>Verplaatsbewijs - Scannen</title>
+	</head>
+	<body>
+
+		<div>
+			<video muted playsinline id="qr-video"></video>
+		</div>
+		
+		<p>
+			Toon de QR-code van het Verplaatsbewijs om deze te scannen.
+		</p>
+
+		<script type="module">
+			import QrScanner from "/js/qr-scanner/qr-scanner.min.js";
+			QrScanner.WORKER_PATH = '/js/qr-scanner/qr-scanner-worker.min.js';
+
+			const video = document.getElementById('qr-video');
+
+			function setResult(label, result) {
+				if (/https:\/\/www.verplaatsbewijs.nl\//.test(location.href))
+				{
+					// Open link naar Verplaatsbewijs
+					location.href = result;
+				}
+				else
+				{
+					alert("Geen geldig verplaatsbewijs.");
+				}
+			}
+
+			const scanner = new QrScanner(video, result => setResult(camQrResult, result));
+			scanner.start();
+		</script>
+		
+	</body>
+</html>

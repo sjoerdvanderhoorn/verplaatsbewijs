@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="nl">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<title>Verplaatsbewijs - Controleren</title>
+		<link href="/css/verplaatsbewijs-nl/verplaatsbewijs.css" rel="stylesheet">
+		<script src="/js/verplaatsbewijs-nl/verplaatsbewijs.js"></script>
+		<script src="/js/qrcode-js/qrcode.min.js"></script>
+		<script src="/js/js-sha512/sha512.min.js"></script>
+	</head>
+	<body>
+
+		<div id="status">
+			<h1 id="statustitel">Verplaatsbewijs aan het controleren...</h1>
+			<div id="statusbericht"></div>
+			<div id="qrcode"></div>
+		</div>
+		
+		<button onclick="window.print();">Afdrukken</button>
+		
+		<script>
+			verplaatsbewijs.databasecontrole(/* Vervang dit door een verbinding met een database. */ window.confirm("Deze melding wordt in de definitieve implementatie vervangen door een databaseverbindig.\n\nVoor nu, klik 'OK' als je wilt dat de database aangeeft dat Uitnodigingscode en Code 2 met elkaar overeen komen, of klik 'Annuleren' wanneer de gegeven combinatie niet overeen komt met wat in de database staat."));
+			verplaatsbewijs.inlezen();
+			verplaatsbewijs.valideer();
+			
+			var el =
+			{
+				status: document.getElementById("status"),
+				titel: document.getElementById("statustitel"),
+				bericht: document.getElementById("statusbericht"),
+				qrcode: document.getElementById("qrcode")
+			};
+			
+			// Toon status
+			if (verplaatsbewijs.data.status.length > 0)
+			{
+				el.status.className = "invalide";
+				el.titel.innerText = "Verplaatsbewijs ongeldig";
+				el.bericht.innerText = "";
+				el.bericht.innerText += "Fouten:";
+				el.bericht.innerText += "\n";
+				el.bericht.innerText += verplaatsbewijs.data.status.join("\n");
+			}
+			else
+			{
+				el.status.className = "valide";
+				el.titel.innerText = "Geldig verplaatsbewijs";
+				el.bericht.innerText = "";
+				el.bericht.innerText += verplaatsbewijs.data.naam + "\n\n";
+				el.bericht.innerText += verplaatsbewijs.data.adressen
+					.filter(function(adres)
+					{
+						return adres;
+					})
+					.map(function(adres)
+					{
+						return adres.substring(0, 6) + " " + adres.substring(6);
+					}).join("\n");
+			}
+			// Toon QR-code aan de hand van gegevens in verplaatsbewijs.data.
+			new QRCode(el.qrcode,
+			{
+				text: verplaatsbewijs.genereer.link(),
+				width: 256,
+				height: 256,
+				colorDark : "#000000",
+				colorLight : "#ffffff",
+				correctLevel : QRCode.CorrectLevel.M
+			});
+		</script>
+		
+	</body>
+</html>
